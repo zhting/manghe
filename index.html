@@ -6,19 +6,19 @@
 <title>衣启盲盒 · 服装订阅</title>
 <style>
   :root{
-    --bg:#F5F5F7;
+    --bg:#F7F4F3;          /* 暖白底 */
     --surface:#FFFFFF;
-    --ink:#1F1D2B;
-    --ink-2:#8A8798;
-    --line:#ECEAF2;
-    --accent:#F0A422;
+    --ink:#241C1D;          /* 暖黑 */
+    --ink-2:#9B8F8E;
+    --line:#F1E7E6;
+    --accent:#F5A623;       /* 金色缎带 */
     --accent-ink:#8A5800;
-    --lilac:#EFEDF8;
-    --violet:#5B4BC4;
+    --lilac:#FFE7E9;        /* 浅粉红底 */
+    --violet:#FF3B4E;       /* 主品牌红 */
     --ok:#2E9E6B;
-    --danger:#F03E3E;
+    --danger:#FF2D3F;
     --radius:16px;
-    --shadow:0 6px 20px rgba(31,29,43,.07);
+    --shadow:0 6px 20px rgba(60,20,22,.08);
     font-size:16px;
   }
   *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
@@ -36,16 +36,18 @@
   /* ---------- 顶栏 ---------- */
   .topbar{
     position:sticky;top:0;z-index:20;
-    background:rgba(245,245,247,.92);backdrop-filter:blur(10px);
+    background:linear-gradient(120deg,rgba(226,42,66,.94) 0%,rgba(255,77,94,.94) 55%,rgba(255,122,92,.94) 100%);
+    backdrop-filter:blur(10px);
     padding:14px 16px 10px;display:flex;align-items:center;gap:10px;
+    color:#fff;
   }
   .topbar .back{
-    width:34px;height:34px;border-radius:50%;background:var(--surface);
-    box-shadow:var(--shadow);display:none;align-items:center;justify-content:center;
+    width:34px;height:34px;border-radius:50%;background:rgba(255,255,255,.24);
+    color:#fff;box-shadow:none;display:none;align-items:center;justify-content:center;
     font-size:18px;line-height:1;flex:0 0 auto;
   }
-  .topbar h1{font-size:1.15rem;font-weight:800;letter-spacing:.5px;flex:1}
-  .topbar .sub{font-size:.72rem;color:var(--ink-2)}
+  .topbar h1{font-size:1.15rem;font-weight:800;letter-spacing:.5px;flex:1;color:#fff}
+  .topbar .sub{font-size:.72rem;color:rgba(255,255,255,.8)}
 
   main{flex:1;padding:4px 16px 96px;overflow-x:hidden}
   .view{display:none;animation:fadein .22s ease}
@@ -55,7 +57,7 @@
 
   /* ---------- 首页 · 盲盒列表 ---------- */
   .hero{
-    background:linear-gradient(135deg,#232030 0%,#3D3268 60%,#5B4BC4 100%);
+    background:linear-gradient(135deg,#2A0F13 0%,#7A1424 55%,#E2294B 100%);
     color:#fff;border-radius:20px;padding:18px 18px 16px;margin:6px 0 18px;
     position:relative;overflow:hidden;
   }
@@ -64,7 +66,7 @@
     font-size:120px;font-weight:900;color:rgba(255,255,255,.08);
   }
   .hero .tag{
-    display:inline-block;background:var(--accent);color:#2A2440;
+    display:inline-block;background:linear-gradient(135deg,#FFC658,#F5A623);color:var(--ink);
     font-size:.68rem;font-weight:700;padding:3px 10px;border-radius:999px;margin-bottom:8px;
   }
   .hero h2{font-size:1.3rem;font-weight:800;line-height:1.35}
@@ -76,7 +78,7 @@
   }
   .box-card .seal{
     position:absolute;top:12px;left:0;z-index:2;
-    background:var(--accent);color:#2A2440;font-size:.68rem;font-weight:800;
+    background:linear-gradient(135deg,#FFC658,#F5A623);color:var(--ink);font-size:.68rem;font-weight:800;
     padding:4px 12px 4px 14px;border-radius:0 999px 999px 0;
     box-shadow:0 2px 6px rgba(0,0,0,.15);
   }
@@ -160,11 +162,11 @@
   .sample:active{transform:scale(.95)}
   .sample.on{border-color:var(--violet)}
   .sample.on .ph::after{
-    content:"";position:absolute;inset:0;background:rgba(91,75,196,.18);
+    content:"";position:absolute;inset:0;background:rgba(255,59,78,.18);
   }
   .sample .badge{
     position:absolute;top:-8px;right:-8px;width:26px;height:26px;border-radius:50%;
-    background:var(--accent);color:#2A2440;font-size:.8rem;font-weight:800;
+    background:linear-gradient(135deg,#FFC658,#F5A623);color:var(--ink);font-size:.8rem;font-weight:800;
     display:none;align-items:center;justify-content:center;
     transform:rotate(8deg);box-shadow:0 2px 6px rgba(0,0,0,.25);z-index:3;
   }
@@ -208,7 +210,7 @@
     padding:8px 16px;border-radius:999px;background:var(--bg);
     font-size:.85rem;font-weight:600;border:1.5px solid transparent;color:var(--ink-2);
   }
-  .chip.on{background:#F6F4FF;border-color:var(--violet);color:var(--violet);font-weight:800}
+  .chip.on{background:var(--lilac);border-color:var(--violet);color:var(--violet);font-weight:800}
   .field{margin-bottom:10px}
   .field label{display:block;font-size:.72rem;color:var(--ink-2);margin-bottom:5px}
   .field input{
@@ -257,7 +259,7 @@
   .likes-strip .m svg{width:76%;height:76%}
   .likes-strip .m i{
     position:absolute;top:-5px;right:-5px;width:16px;height:16px;border-radius:50%;z-index:2;
-    background:var(--accent);color:#2A2440;font-size:.58rem;font-weight:800;font-style:normal;
+    background:linear-gradient(135deg,#FFC658,#F5A623);color:var(--ink);font-size:.58rem;font-weight:800;font-style:normal;
     display:flex;align-items:center;justify-content:center;transform:rotate(8deg);
   }
 
@@ -412,7 +414,7 @@ const SAMPLE_COUNT = 10;
 
 /* ================= 插画兜底（图片加载失败时使用） ================= */
 const PALETTES = [
-  ["#5B4BC4","#C9C2F0"],["#E4735C","#F6D3C7"],["#2E9E6B","#BEE8D2"],
+  ["#FF3B4E","#FFC9CE"],["#E4735C","#F6D3C7"],["#2E9E6B","#BEE8D2"],
   ["#3E6FB8","#C6DAF3"],["#C79A2B","#F1E2B3"],["#8A55B5","#E0CDF0"],
   ["#4A4A5E","#CFCFDD"],["#C4506B","#F2CBD6"],["#3A9E9E","#C4EAEA"],
   ["#7B6247","#E2D4C3"]
