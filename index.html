@@ -1,0 +1,656 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>衣启盲盒 · 服装订阅</title>
+<style>
+  :root{
+    --bg:#F3F2F7;          /* 冷调紫灰底 */
+    --surface:#FFFFFF;
+    --ink:#26223B;          /* 深紫墨 */
+    --ink-2:#6E6A85;
+    --line:#E4E1EF;
+    --accent:#F0A422;       /* 姜黄封条色 */
+    --accent-ink:#8A5800;
+    --lilac:#E9E6F7;
+    --violet:#5B4BC4;
+    --ok:#2E9E6B;
+    --danger:#D8503F;
+    --radius:16px;
+    --shadow:0 6px 20px rgba(38,34,59,.08);
+    font-size:16px;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  html,body{height:100%}
+  body{
+    font-family:"PingFang SC","Noto Sans SC","Microsoft YaHei",system-ui,sans-serif;
+    background:var(--bg);color:var(--ink);
+    max-width:480px;margin:0 auto;min-height:100vh;
+    display:flex;flex-direction:column;position:relative;
+  }
+  button{font-family:inherit;border:0;background:none;cursor:pointer;color:inherit}
+  input,select{font-family:inherit;font-size:1rem;color:var(--ink)}
+
+  /* ---------- 顶栏 ---------- */
+  .topbar{
+    position:sticky;top:0;z-index:20;
+    background:rgba(243,242,247,.92);backdrop-filter:blur(10px);
+    padding:14px 16px 10px;display:flex;align-items:center;gap:10px;
+  }
+  .topbar .back{
+    width:34px;height:34px;border-radius:50%;background:var(--surface);
+    box-shadow:var(--shadow);display:none;align-items:center;justify-content:center;
+    font-size:18px;line-height:1;flex:0 0 auto;
+  }
+  .topbar h1{font-size:1.15rem;font-weight:800;letter-spacing:.5px;flex:1}
+  .topbar .sub{font-size:.72rem;color:var(--ink-2)}
+
+  main{flex:1;padding:4px 16px 96px;overflow-x:hidden}
+  .view{display:none;animation:fadein .22s ease}
+  .view.active{display:block}
+  @keyframes fadein{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+  @media (prefers-reduced-motion:reduce){.view{animation:none}}
+
+  /* ---------- 首页 · 盲盒列表 ---------- */
+  .hero{
+    background:linear-gradient(135deg,#2A2440 0%,#40357A 60%,#5B4BC4 100%);
+    color:#fff;border-radius:20px;padding:18px 18px 16px;margin:6px 0 18px;
+    position:relative;overflow:hidden;
+  }
+  .hero::after{
+    content:"？";position:absolute;right:-6px;bottom:-26px;
+    font-size:120px;font-weight:900;color:rgba(255,255,255,.08);
+  }
+  .hero .tag{
+    display:inline-block;background:var(--accent);color:#2A2440;
+    font-size:.68rem;font-weight:700;padding:3px 10px;border-radius:999px;margin-bottom:8px;
+  }
+  .hero h2{font-size:1.3rem;font-weight:800;line-height:1.35}
+  .hero p{font-size:.78rem;opacity:.75;margin-top:6px;line-height:1.6}
+
+  .box-card{
+    background:var(--surface);border-radius:var(--radius);box-shadow:var(--shadow);
+    margin-bottom:16px;overflow:hidden;position:relative;
+  }
+  .box-card .seal{
+    position:absolute;top:12px;left:-8px;z-index:2;
+    background:var(--accent);color:#2A2440;font-size:.68rem;font-weight:800;
+    padding:4px 12px 4px 14px;border-radius:0 999px 999px 0;
+    box-shadow:0 2px 6px rgba(0,0,0,.15);
+  }
+  .box-card .thumbs{
+    display:grid;grid-template-columns:repeat(4,1fr);gap:6px;
+    padding:14px 14px 0;
+  }
+  .thumb{
+    background:var(--lilac);border-radius:12px;aspect-ratio:1;
+    display:flex;align-items:center;justify-content:center;overflow:hidden;
+  }
+  .thumb svg{width:78%;height:78%}
+  .thumb.more{position:relative;color:var(--violet);font-weight:700;font-size:.8rem}
+  .box-card .info{padding:12px 14px 14px;display:flex;align-items:flex-end;gap:10px}
+  .box-card .info .name{flex:1}
+  .box-card .info .name b{font-size:1.02rem;font-weight:800;display:block}
+  .box-card .info .name span{font-size:.72rem;color:var(--ink-2);display:block;margin-top:3px}
+  .price{color:var(--danger);font-weight:800;font-size:1.15rem;white-space:nowrap}
+  .price small{font-size:.7rem;font-weight:600}
+  .ship{font-size:.68rem;color:var(--ink-2);text-align:right;margin-top:2px}
+  .note{font-size:.7rem;color:var(--ink-2);text-align:center;margin:4px 0 12px;line-height:1.7}
+
+  /* ---------- 详情页 ---------- */
+  .detail-head{
+    background:var(--surface);border-radius:var(--radius);box-shadow:var(--shadow);
+    padding:14px;margin-bottom:14px;
+  }
+  .detail-head .row{display:flex;align-items:flex-start;gap:10px}
+  .detail-head b{font-size:1.1rem;font-weight:800}
+  .detail-head .desc{font-size:.75rem;color:var(--ink-2);margin-top:5px;line-height:1.7}
+  .pill{
+    display:inline-block;background:var(--lilac);color:var(--violet);
+    font-size:.68rem;font-weight:700;padding:3px 10px;border-radius:999px;margin-right:6px;
+  }
+  .warn{
+    margin-top:10px;background:#FFF7E8;border:1px dashed var(--accent);
+    color:var(--accent-ink);font-size:.72rem;border-radius:10px;padding:8px 10px;line-height:1.6;
+  }
+
+  .pick-bar{
+    display:flex;align-items:center;justify-content:space-between;
+    margin:2px 2px 10px;
+  }
+  .pick-bar b{font-size:.9rem;font-weight:800}
+  .pick-count{font-size:.75rem;color:var(--ink-2)}
+  .pick-count em{font-style:normal;color:var(--violet);font-weight:800;font-size:.95rem}
+
+  .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+  .sample{
+    background:var(--surface);border-radius:14px;aspect-ratio:1;position:relative;
+    display:flex;align-items:center;justify-content:center;
+    border:2px solid transparent;box-shadow:0 2px 8px rgba(38,34,59,.06);
+    transition:transform .12s ease,border-color .12s ease;
+  }
+  .sample svg{width:76%;height:76%}
+  .sample:active{transform:scale(.95)}
+  .sample.on{border-color:var(--violet);background:#F6F4FF}
+  .sample .badge{
+    position:absolute;top:-7px;right:-7px;width:26px;height:26px;border-radius:50%;
+    background:var(--accent);color:#2A2440;font-size:.8rem;font-weight:800;
+    display:none;align-items:center;justify-content:center;
+    transform:rotate(8deg);box-shadow:0 2px 6px rgba(0,0,0,.2);
+  }
+  .sample.on .badge{display:flex}
+  .sample .cat{
+    position:absolute;bottom:6px;left:0;right:0;text-align:center;
+    font-size:.62rem;color:var(--ink-2);
+  }
+
+  /* ---------- 底部固定操作条 ---------- */
+  .cta-bar{
+    position:fixed;bottom:0;left:50%;transform:translateX(-50%);
+    width:100%;max-width:480px;z-index:30;
+    background:rgba(255,255,255,.95);backdrop-filter:blur(10px);
+    border-top:1px solid var(--line);
+    padding:10px 16px calc(10px + env(safe-area-inset-bottom));
+    display:none;align-items:center;gap:12px;
+  }
+  .cta-bar.show{display:flex}
+  .cta-bar .meta{flex:1;font-size:.72rem;color:var(--ink-2);line-height:1.5}
+  .cta-bar .meta b{color:var(--danger);font-size:1rem}
+  .btn{
+    background:var(--ink);color:#fff;font-weight:800;font-size:.95rem;
+    padding:12px 26px;border-radius:999px;transition:opacity .15s;
+  }
+  .btn.accent{background:var(--violet)}
+  .btn:disabled{opacity:.35}
+  .btn.ghost{background:var(--lilac);color:var(--violet);padding:12px 18px}
+
+  /* ---------- 订阅设置页 ---------- */
+  .form-card{
+    background:var(--surface);border-radius:var(--radius);box-shadow:var(--shadow);
+    padding:16px 14px;margin-bottom:14px;
+  }
+  .form-card h3{font-size:.92rem;font-weight:800;margin-bottom:12px;display:flex;align-items:center;gap:8px}
+  .form-card h3::before{content:"";width:4px;height:14px;border-radius:2px;background:var(--accent)}
+  .chips{display:flex;flex-wrap:wrap;gap:8px}
+  .chip{
+    padding:8px 16px;border-radius:999px;background:var(--bg);
+    font-size:.85rem;font-weight:600;border:1.5px solid transparent;color:var(--ink-2);
+  }
+  .chip.on{background:#F6F4FF;border-color:var(--violet);color:var(--violet);font-weight:800}
+  .field{margin-bottom:10px}
+  .field label{display:block;font-size:.72rem;color:var(--ink-2);margin-bottom:5px}
+  .field input{
+    width:100%;border:1.5px solid var(--line);border-radius:10px;
+    padding:10px 12px;background:#FBFAFE;outline:none;
+  }
+  .field input:focus{border-color:var(--violet)}
+  .summary{font-size:.8rem;line-height:2;color:var(--ink-2)}
+  .summary .r{display:flex;justify-content:space-between}
+  .summary .r b{color:var(--ink)}
+  .summary .total b{color:var(--danger);font-size:1.05rem}
+  .liked-mini{display:flex;gap:6px;flex-wrap:wrap;margin-top:4px}
+  .liked-mini .m{width:44px;height:44px;border-radius:10px;background:var(--lilac);display:flex;align-items:center;justify-content:center}
+  .liked-mini .m svg{width:76%;height:76%}
+
+  /* ---------- 订阅列表 ---------- */
+  .empty{
+    text-align:center;color:var(--ink-2);font-size:.82rem;padding:60px 20px;line-height:2;
+  }
+  .empty .q{font-size:56px;color:var(--line);font-weight:900}
+  .sub-card{
+    background:var(--surface);border-radius:var(--radius);box-shadow:var(--shadow);
+    padding:14px;margin-bottom:14px;
+  }
+  .sub-card .head{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+  .sub-card .head b{flex:1;font-size:.98rem;font-weight:800}
+  .status{
+    font-size:.66rem;font-weight:700;padding:3px 10px;border-radius:999px;
+    background:#E7F6EE;color:var(--ok);
+  }
+  .status.wait{background:#FFF3E0;color:var(--accent-ink)}
+  .sub-card .rows{font-size:.75rem;color:var(--ink-2);line-height:1.9}
+  .sub-card .rows b{color:var(--ink)}
+  .progress{
+    margin:10px 0 4px;height:8px;border-radius:99px;background:var(--bg);overflow:hidden;
+  }
+  .progress i{display:block;height:100%;background:linear-gradient(90deg,var(--accent),var(--violet));border-radius:99px}
+  .p-label{display:flex;justify-content:space-between;font-size:.68rem;color:var(--ink-2)}
+  .sub-actions{display:flex;gap:10px;margin-top:12px}
+  .sub-actions .btn{flex:1;padding:10px 0;font-size:.85rem;text-align:center}
+  .likes-strip{display:flex;gap:6px;overflow-x:auto;margin-top:10px;padding-bottom:2px}
+  .likes-strip .m{flex:0 0 46px;width:46px;height:46px;border-radius:10px;background:var(--lilac);display:flex;align-items:center;justify-content:center;position:relative}
+  .likes-strip .m svg{width:76%;height:76%}
+  .likes-strip .m i{
+    position:absolute;top:-4px;right:-4px;width:16px;height:16px;border-radius:50%;
+    background:var(--accent);color:#2A2440;font-size:.58rem;font-weight:800;font-style:normal;
+    display:flex;align-items:center;justify-content:center;transform:rotate(8deg);
+  }
+
+  /* ---------- 底部 Tab ---------- */
+  .tabbar{
+    position:fixed;bottom:0;left:50%;transform:translateX(-50%);
+    width:100%;max-width:480px;z-index:25;
+    background:rgba(255,255,255,.96);backdrop-filter:blur(10px);
+    border-top:1px solid var(--line);display:flex;
+    padding:6px 0 calc(6px + env(safe-area-inset-bottom));
+  }
+  .tabbar button{
+    flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;
+    font-size:.66rem;color:var(--ink-2);padding:4px 0;
+  }
+  .tabbar button .ic{font-size:20px;line-height:1}
+  .tabbar button.on{color:var(--violet);font-weight:800}
+  .tabbar .dot{
+    position:absolute;margin-left:26px;margin-top:-2px;
+    min-width:16px;height:16px;border-radius:99px;background:var(--danger);
+    color:#fff;font-size:.6rem;display:flex;align-items:center;justify-content:center;padding:0 4px;
+  }
+  .toast{
+    position:fixed;left:50%;bottom:110px;transform:translateX(-50%) translateY(10px);
+    background:rgba(38,34,59,.92);color:#fff;font-size:.8rem;
+    padding:9px 18px;border-radius:999px;opacity:0;pointer-events:none;
+    transition:all .25s ease;z-index:99;white-space:nowrap;
+  }
+  .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+</style>
+</head>
+<body>
+
+<header class="topbar">
+  <button class="back" id="backBtn" onclick="goBack()">‹</button>
+  <div style="flex:1">
+    <h1 id="pageTitle">衣启盲盒</h1>
+    <div class="sub" id="pageSub">每一期，都是一次开箱惊喜</div>
+  </div>
+</header>
+
+<main>
+  <!-- ① 盲盒列表 -->
+  <section class="view" id="view-home">
+    <div class="hero">
+      <span class="tag">按月订阅 · 惊喜发货</span>
+      <h2>选一个盲盒，<br>让穿搭交给惊喜</h2>
+      <p>下方样例图仅展示盲盒可能寄出的同类风格商品，实际发货为同品类惊喜款，不会与样例完全相同。</p>
+    </div>
+    <div id="boxList"></div>
+    <p class="note">— 样例图仅供风格参考 · 实际商品以收货为准 —</p>
+  </section>
+
+  <!-- ② 盲盒详情 · 喜好挑选 -->
+  <section class="view" id="view-detail">
+    <div class="detail-head" id="detailHead"></div>
+    <div class="pick-bar">
+      <b>挑选你喜欢的样图</b>
+      <span class="pick-count">已选 <em id="pickNum">0</em> / 9</span>
+    </div>
+    <div class="grid" id="sampleGrid"></div>
+    <p class="note">点选样图作为发货喜好依据，最多 9 张，可随时调整。<br>我们会参考你的喜好为你搭配同品类惊喜款。</p>
+  </section>
+
+  <!-- ③ 订阅设置 -->
+  <section class="view" id="view-checkout">
+    <div class="form-card">
+      <h3>已选喜好样图</h3>
+      <div class="liked-mini" id="likedMini"></div>
+    </div>
+    <div class="form-card">
+      <h3>选择尺码</h3>
+      <div class="chips" id="sizeChips"></div>
+    </div>
+    <div class="form-card">
+      <h3>收货地址</h3>
+      <div class="field"><label>收货人</label><input id="fName" placeholder="姓名" value="王小明"></div>
+      <div class="field"><label>手机号</label><input id="fPhone" placeholder="11 位手机号" value="138 0000 0000"></div>
+      <div class="field"><label>详细地址</label><input id="fAddr" placeholder="省 / 市 / 区 / 街道门牌" value="上海市静安区南京西路 100 号"></div>
+    </div>
+    <div class="form-card">
+      <h3>订阅计划</h3>
+      <div class="field"><label>发货频率</label>
+        <div class="chips" id="freqChips"></div>
+      </div>
+      <div class="field" style="margin-top:12px"><label>订阅期数</label>
+        <div class="chips" id="periodChips"></div>
+      </div>
+    </div>
+    <div class="form-card">
+      <h3>费用小结</h3>
+      <div class="summary" id="costSummary"></div>
+    </div>
+  </section>
+
+  <!-- ④ 我的订阅 -->
+  <section class="view" id="view-subs">
+    <div id="subList"></div>
+  </section>
+</main>
+
+<!-- 底部操作条 -->
+<div class="cta-bar" id="ctaBar">
+  <div class="meta" id="ctaMeta"></div>
+  <button class="btn accent" id="ctaBtn"></button>
+</div>
+
+<!-- 底部 Tab -->
+<nav class="tabbar" id="tabbar">
+  <button id="tabHome" class="on" onclick="go('home')"><span class="ic">🎁</span>盲盒</button>
+  <button id="tabSubs" onclick="go('subs')" style="position:relative"><span class="ic">📦</span>我的订阅<span class="dot" id="subDot" style="display:none"></span></button>
+</nav>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* ================= 数据 ================= */
+const PALETTES = [
+  ["#5B4BC4","#C9C2F0"],["#E4735C","#F6D3C7"],["#2E9E6B","#BEE8D2"],
+  ["#3E6FB8","#C6DAF3"],["#C79A2B","#F1E2B3"],["#8A55B5","#E0CDF0"],
+  ["#4A4A5E","#CFCFDD"],["#C4506B","#F2CBD6"],["#3A9E9E","#C4EAEA"],
+  ["#7B6247","#E2D4C3"],["#D0873A","#F5DDBE"],["#556B2F","#D5E0BE"]
+];
+const PATTERNS = ["solid","stripe","dot","solid","stripe","solid","dot","solid","stripe","dot","solid","stripe"];
+
+const BOXES = [
+  {id:"tee",   name:"元气T恤盲盒",  cat:"T恤",  type:"tshirt",  price:69,  ship:8,  sizes:["S","M","L","XL","XXL"],
+   desc:"每期随机寄出 1 件同风格印花或纯色 T 恤，参考你的喜好样图搭配。"},
+  {id:"shirt", name:"通勤衬衫盲盒", cat:"衬衫", type:"shirt",   price:129, ship:0,  sizes:["S","M","L","XL","XXL"],
+   desc:"每期随机寄出 1 件通勤衬衫，条纹、格纹或纯色，风格贴合你的喜好。"},
+  {id:"pants", name:"绅装西裤盲盒", cat:"西裤", type:"trousers",price:159, ship:10, sizes:["29","30","31","32","33","34","36"],
+   desc:"每期随机寄出 1 条剪裁西裤，版型与色系参考你挑选的样图。"},
+  {id:"hoodie",name:"街头卫衣盲盒", cat:"卫衣", type:"hoodie",  price:139, ship:0,  sizes:["S","M","L","XL","XXL"],
+   desc:"每期随机寄出 1 件潮流卫衣，连帽或圆领惊喜款。"},
+  {id:"dress", name:"轻裙物语盲盒", cat:"连衣裙",type:"dress",  price:169, ship:12, sizes:["S","M","L","XL"],
+   desc:"每期随机寄出 1 条应季连衣裙，色彩与廓形参考你的喜好。"}
+];
+
+const FREQS = [
+  {id:"monthly", label:"每月一次", days:30},
+  {id:"biweekly",label:"每两周一次", days:14}
+];
+const PERIODS = [3,6,12];
+
+/* ================= 服装样图 SVG ================= */
+function garmentSVG(type,i){
+  const [c1,c2] = PALETTES[i % PALETTES.length];
+  const pat = PATTERNS[i % PATTERNS.length];
+  const pid = `p_${type}_${i}`;
+  let defs = "";
+  let fill = c1;
+  if(pat==="stripe"){
+    defs = `<defs><pattern id="${pid}" width="12" height="12" patternUnits="userSpaceOnUse" patternTransform="rotate(0)">
+      <rect width="12" height="12" fill="${c1}"/><rect width="12" height="5" fill="${c2}"/></pattern></defs>`;
+    fill = `url(#${pid})`;
+  } else if(pat==="dot"){
+    defs = `<defs><pattern id="${pid}" width="14" height="14" patternUnits="userSpaceOnUse">
+      <rect width="14" height="14" fill="${c1}"/><circle cx="7" cy="7" r="2.4" fill="${c2}"/></pattern></defs>`;
+    fill = `url(#${pid})`;
+  }
+  const stroke = `stroke="#26223B" stroke-width="2.5" stroke-linejoin="round"`;
+  let body = "";
+  if(type==="tshirt"){
+    body = `<path d="M32 16 L18 24 L8 42 L22 50 L26 43 L26 88 L74 88 L74 43 L78 50 L92 42 L82 24 L68 16 Q59 26 50 26 Q41 26 32 16 Z" fill="${fill}" ${stroke}/>
+            <path d="M40 17 Q50 24 60 17" fill="none" ${stroke}/>`;
+  } else if(type==="shirt"){
+    body = `<path d="M34 14 L20 22 L12 44 L24 50 L28 42 L28 92 L72 92 L72 42 L76 50 L88 44 L80 22 L66 14 L58 26 L50 22 L42 26 Z" fill="${fill}" ${stroke}/>
+            <path d="M42 26 L50 22 L58 26" fill="none" ${stroke}/>
+            <line x1="50" y1="30" x2="50" y2="88" stroke="#26223B" stroke-width="2"/>
+            <circle cx="50" cy="40" r="1.8" fill="#26223B"/><circle cx="50" cy="55" r="1.8" fill="#26223B"/><circle cx="50" cy="70" r="1.8" fill="#26223B"/>`;
+  } else if(type==="trousers"){
+    body = `<path d="M30 14 H70 L75 90 H56 L50 44 L44 90 H25 Z" fill="${fill}" ${stroke}/>
+            <rect x="29" y="12" width="42" height="8" rx="2" fill="${c2}" ${stroke}/>
+            <line x1="50" y1="22" x2="50" y2="14" stroke="#26223B" stroke-width="2"/>`;
+  } else if(type==="hoodie"){
+    body = `<path d="M32 22 L18 30 L10 48 L24 54 L28 47 L28 90 L72 90 L72 47 L76 54 L90 48 L82 30 L68 22 Z" fill="${fill}" ${stroke}/>
+            <path d="M32 22 Q34 8 50 8 Q66 8 68 22 Q60 30 50 30 Q40 30 32 22 Z" fill="${c2}" ${stroke}/>
+            <line x1="45" y1="32" x2="44" y2="44" stroke="#26223B" stroke-width="2.4" stroke-linecap="round"/>
+            <line x1="55" y1="32" x2="56" y2="44" stroke="#26223B" stroke-width="2.4" stroke-linecap="round"/>
+            <path d="M38 72 H62 V90 H38 Z" fill="${c2}" ${stroke}/>`;
+  } else if(type==="dress"){
+    body = `<path d="M36 12 L32 30 L18 90 H82 L68 30 L64 12 Q57 22 50 22 Q43 22 36 12 Z" fill="${fill}" ${stroke}/>
+            <path d="M32 30 Q50 40 68 30" fill="none" ${stroke}/>`;
+  }
+  return `<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">${defs}${body}</svg>`;
+}
+const sampleName = (box,i)=>`${box.cat}样例 ${String(i+1).padStart(2,"0")}`;
+
+/* ================= 状态 ================= */
+const store = {
+  get subs(){ try{return JSON.parse(localStorage.getItem("mh_subs")||"[]")}catch(e){return[]} },
+  set subs(v){ localStorage.setItem("mh_subs",JSON.stringify(v)) }
+};
+let navStack = ["home"];
+let cur = { boxId:null, likes:[], editingSubId:null, size:null, freq:"monthly", period:3 };
+
+/* ================= 路由 ================= */
+const VIEWS = {
+  home:    {title:"衣启盲盒", sub:"每一期，都是一次开箱惊喜", tab:true},
+  detail:  {title:"盲盒详情", sub:"挑选样图，告诉我们你的喜好", tab:false},
+  checkout:{title:"订阅设置", sub:"确认尺码、地址与订阅计划", tab:false},
+  subs:    {title:"我的订阅", sub:"随时查看进展 · 调整喜好", tab:true}
+};
+function go(name, push=true){
+  if(push && navStack[navStack.length-1]!==name) navStack.push(name);
+  document.querySelectorAll(".view").forEach(v=>v.classList.remove("active"));
+  document.getElementById("view-"+name).classList.add("active");
+  const v = VIEWS[name];
+  document.getElementById("pageTitle").textContent = v.title;
+  document.getElementById("pageSub").textContent = v.sub;
+  document.getElementById("backBtn").style.display = v.tab ? "none" : "flex";
+  document.getElementById("tabbar").style.display = v.tab ? "flex" : "none";
+  document.getElementById("tabHome").classList.toggle("on", name==="home");
+  document.getElementById("tabSubs").classList.toggle("on", name==="subs");
+  if(name==="home") renderHome();
+  if(name==="detail") renderDetail();
+  if(name==="checkout") renderCheckout();
+  if(name==="subs") renderSubs();
+  updateCTA(name);
+  window.scrollTo({top:0});
+}
+function goBack(){
+  navStack.pop();
+  go(navStack[navStack.length-1]||"home", false);
+}
+function toast(msg){
+  const t = document.getElementById("toast");
+  t.textContent = msg; t.classList.add("show");
+  clearTimeout(t._h); t._h = setTimeout(()=>t.classList.remove("show"),1800);
+}
+
+/* ================= ① 首页 ================= */
+function renderHome(){
+  const el = document.getElementById("boxList");
+  el.innerHTML = BOXES.map(b=>{
+    const thumbs = [0,1,2].map(i=>`<div class="thumb">${garmentSVG(b.type,i)}</div>`).join("");
+    return `<div class="box-card" onclick="openBox('${b.id}')">
+      <span class="seal">？ ${b.cat}盲盒</span>
+      <div class="thumbs">${thumbs}<div class="thumb more">+9<br>样例</div></div>
+      <div class="info">
+        <div class="name"><b>${b.name}</b><span>样例图仅供参考 · 发同品类惊喜款</span></div>
+        <div>
+          <div class="price">¥${b.price}<small> /期</small></div>
+          <div class="ship">${b.ship===0?"免运费":"运费 ¥"+b.ship+" /期"}</div>
+        </div>
+      </div>
+    </div>`;
+  }).join("");
+  const n = store.subs.length;
+  const dot = document.getElementById("subDot");
+  dot.style.display = n?"flex":"none"; dot.textContent = n;
+}
+function openBox(id){
+  cur = { boxId:id, likes:[], editingSubId:null, size:null, freq:"monthly", period:3 };
+  go("detail");
+}
+
+/* ================= ② 详情 · 选喜好 ================= */
+function renderDetail(){
+  const b = BOXES.find(x=>x.id===cur.boxId);
+  document.getElementById("detailHead").innerHTML = `
+    <div class="row"><b>${b.name}</b>
+      <div style="text-align:right">
+        <div class="price">¥${b.price}<small> /期</small></div>
+        <div class="ship">${b.ship===0?"免运费":"运费 ¥"+b.ship+" /期"}</div>
+      </div>
+    </div>
+    <div style="margin-top:8px"><span class="pill">${b.cat}</span><span class="pill">惊喜发货</span><span class="pill">支持退换</span></div>
+    <div class="desc">${b.desc}</div>
+    <div class="warn">⚠ 以下均为<b>样例图</b>：用于表达你的喜好风格，实际寄出为同品类相似风格商品，<b>不会寄出完全相同的一件</b>。</div>`;
+  const grid = document.getElementById("sampleGrid");
+  grid.innerHTML = Array.from({length:12},(_,i)=>{
+    const on = cur.likes.includes(i);
+    const order = cur.likes.indexOf(i)+1;
+    return `<button class="sample ${on?"on":""}" onclick="toggleLike(${i})" aria-pressed="${on}">
+      ${garmentSVG(b.type,i)}
+      <span class="badge">${order||""}</span>
+      <span class="cat">${sampleName(b,i)}</span>
+    </button>`;
+  }).join("");
+  document.getElementById("pickNum").textContent = cur.likes.length;
+}
+function toggleLike(i){
+  const idx = cur.likes.indexOf(i);
+  if(idx>-1){ cur.likes.splice(idx,1); }
+  else{
+    if(cur.likes.length>=9){ toast("最多选择 9 张样图哦"); return; }
+    cur.likes.push(i);
+  }
+  renderDetail(); updateCTA("detail");
+}
+
+/* ================= ③ 订阅设置 ================= */
+function renderCheckout(){
+  const b = BOXES.find(x=>x.id===cur.boxId);
+  document.getElementById("likedMini").innerHTML =
+    cur.likes.map(i=>`<div class="m">${garmentSVG(b.type,i)}</div>`).join("") ||
+    `<span style="font-size:.75rem;color:var(--ink-2)">未选择样图（将由造型师全权搭配）</span>`;
+  document.getElementById("sizeChips").innerHTML = b.sizes.map(s=>
+    `<button class="chip ${cur.size===s?"on":""}" onclick="setSize('${s}')">${s}</button>`).join("");
+  document.getElementById("freqChips").innerHTML = FREQS.map(f=>
+    `<button class="chip ${cur.freq===f.id?"on":""}" onclick="setFreq('${f.id}')">${f.label}</button>`).join("");
+  document.getElementById("periodChips").innerHTML = PERIODS.map(p=>
+    `<button class="chip ${cur.period===p?"on":""}" onclick="setPeriod(${p})">订阅 ${p} 期</button>`).join("");
+  const total = (b.price + b.ship) * cur.period;
+  document.getElementById("costSummary").innerHTML = `
+    <div class="r"><span>盲盒单价</span><b>¥${b.price} / 期</b></div>
+    <div class="r"><span>运费</span><b>${b.ship===0?"免运费":"¥"+b.ship+" / 期"}</b></div>
+    <div class="r"><span>订阅期数</span><b>${cur.period} 期 · ${FREQS.find(f=>f.id===cur.freq).label}</b></div>
+    <div class="r total"><span>合计</span><b>¥${total}</b></div>`;
+  updateCTA("checkout");
+}
+function setSize(s){ cur.size=s; renderCheckout(); }
+function setFreq(f){ cur.freq=f; renderCheckout(); }
+function setPeriod(p){ cur.period=p; renderCheckout(); }
+
+function confirmSub(){
+  const b = BOXES.find(x=>x.id===cur.boxId);
+  if(!cur.size){ toast("请先选择尺码"); return; }
+  const name = document.getElementById("fName").value.trim();
+  const phone = document.getElementById("fPhone").value.trim();
+  const addr = document.getElementById("fAddr").value.trim();
+  if(!name||!phone||!addr){ toast("请完整填写收货地址"); return; }
+  const subs = store.subs;
+  subs.unshift({
+    id:"S"+Date.now(), boxId:b.id, likes:cur.likes.slice(),
+    size:cur.size, freq:cur.freq, period:cur.period,
+    name, phone, addr, shipped:1, createdAt:Date.now()
+  });
+  store.subs = subs;
+  navStack = ["home"];
+  toast("订阅成功，第 1 期正在备货 🎁");
+  go("subs");
+}
+
+/* ================= ④ 我的订阅 ================= */
+function fmtDate(ts){
+  const d = new Date(ts);
+  return `${d.getMonth()+1}月${d.getDate()}日`;
+}
+function renderSubs(){
+  const el = document.getElementById("subList");
+  const subs = store.subs;
+  if(!subs.length){
+    el.innerHTML = `<div class="empty"><div class="q">？</div>还没有订阅任何盲盒<br>去挑一个喜欢的品类开启惊喜吧<br><br><button class="btn accent" onclick="go('home')">去逛盲盒</button></div>`;
+    return;
+  }
+  el.innerHTML = subs.map(s=>{
+    const b = BOXES.find(x=>x.id===s.boxId);
+    const f = FREQS.find(x=>x.id===s.freq);
+    const pct = Math.round(s.shipped/s.period*100);
+    const next = s.shipped>=s.period ? null : s.createdAt + s.shipped*f.days*86400000;
+    const likes = s.likes.map((i,k)=>`<div class="m">${garmentSVG(b.type,i)}<i>${k+1}</i></div>`).join("");
+    return `<div class="sub-card">
+      <div class="head"><b>${b.name}</b>
+        <span class="status ${s.shipped>=s.period?"":"wait"}">${s.shipped>=s.period?"已完结":"进行中 · 第 "+s.shipped+" 期备货中"}</span>
+      </div>
+      <div class="rows">
+        尺码 <b>${s.size}</b> · ${f.label} · 共 <b>${s.period}</b> 期<br>
+        收货：<b>${s.name}</b> ${s.phone}<br>${s.addr}
+        ${next?`<br>下期预计发货：<b>${fmtDate(next)}</b>`:""}
+      </div>
+      <div class="progress"><i style="width:${pct}%"></i></div>
+      <div class="p-label"><span>发货进度</span><span>${s.shipped} / ${s.period} 期</span></div>
+      <div style="font-size:.7rem;color:var(--ink-2);margin-top:10px">我的喜好样图（${s.likes.length}/9）</div>
+      <div class="likes-strip">${likes||'<span style="font-size:.72rem;color:var(--ink-2)">未设置，由造型师搭配</span>'}</div>
+      <div class="sub-actions">
+        <button class="btn ghost" onclick="editLikes('${s.id}')">调整喜好图</button>
+        <button class="btn" onclick="mockShip('${s.id}')">模拟收货</button>
+      </div>
+    </div>`;
+  }).join("");
+}
+function editLikes(sid){
+  const s = store.subs.find(x=>x.id===sid);
+  cur = { boxId:s.boxId, likes:s.likes.slice(), editingSubId:sid };
+  go("detail");
+}
+function saveLikes(){
+  const subs = store.subs;
+  const s = subs.find(x=>x.id===cur.editingSubId);
+  s.likes = cur.likes.slice();
+  store.subs = subs;
+  toast("喜好样图已更新 ✓");
+  navStack = ["subs"];
+  go("subs", false);
+}
+function mockShip(sid){
+  const subs = store.subs;
+  const s = subs.find(x=>x.id===sid);
+  if(s.shipped<s.period){ s.shipped++; store.subs = subs; toast("已签收第 "+(s.shipped-1)+" 期，惊喜到手 🎉"); }
+  else toast("本订阅已全部发完");
+  renderSubs();
+}
+
+/* ================= 底部操作条 ================= */
+function updateCTA(name){
+  const bar = document.getElementById("ctaBar");
+  const meta = document.getElementById("ctaMeta");
+  const btn = document.getElementById("ctaBtn");
+  if(name==="detail"){
+    const b = BOXES.find(x=>x.id===cur.boxId);
+    bar.classList.add("show");
+    meta.innerHTML = `已选 ${cur.likes.length}/9 张喜好样图<br><b>¥${b.price}</b> /期 ${b.ship===0?"· 免运费":"· 运费 ¥"+b.ship}`;
+    if(cur.editingSubId){
+      btn.textContent = "保存喜好";
+      btn.onclick = saveLikes;
+      btn.disabled = false;
+    }else{
+      btn.textContent = "下一步：订阅设置";
+      btn.onclick = ()=>go("checkout");
+      btn.disabled = false;
+    }
+  } else if(name==="checkout"){
+    const b = BOXES.find(x=>x.id===cur.boxId);
+    const total = (b.price+b.ship)*cur.period;
+    bar.classList.add("show");
+    meta.innerHTML = `${cur.period} 期合计<br><b>¥${total}</b>`;
+    btn.textContent = "确认订阅";
+    btn.onclick = confirmSub;
+    btn.disabled = false;
+  } else {
+    bar.classList.remove("show");
+  }
+}
+
+go("home", false);
+</script>
+</body>
+</html>
