@@ -124,27 +124,46 @@
   /* ---------- 详情页 ---------- */
   .detail-head{
     background:var(--surface);border-radius:var(--radius);box-shadow:var(--shadow);
-    padding:14px;margin-bottom:14px;
+    padding:14px;margin-bottom:12px;
   }
   .detail-head .row{display:flex;align-items:flex-start;gap:10px}
   .detail-head b{font-size:1.1rem;font-weight:800}
-  .detail-head .desc{font-size:.75rem;color:var(--ink-2);margin-top:5px;line-height:1.7}
-  .pill{
-    display:inline-block;background:var(--lilac);color:var(--violet);
-    font-size:.68rem;font-weight:700;padding:3px 10px;border-radius:999px;margin-right:6px;
+  .detail-head .mini-note{font-size:.72rem;color:var(--ink-2);margin-top:8px;line-height:1.6}
+
+  /* 喜好篮子 */
+  .basket-card{
+    background:var(--surface);border-radius:var(--radius);box-shadow:var(--shadow);
+    padding:12px 14px;margin-bottom:14px;
   }
-  .warn{
-    margin-top:10px;background:#FFF7E8;border:1px dashed var(--accent);
-    color:var(--accent-ink);font-size:.72rem;border-radius:10px;padding:8px 10px;line-height:1.6;
+  .basket-card .bh{display:flex;align-items:center;justify-content:space-between;margin-bottom:9px}
+  .basket-card .bh b{font-size:.88rem;font-weight:800}
+  .basket-card .bh span{font-size:.75rem;color:var(--ink-2)}
+  .basket-card .bh span em{font-style:normal;color:var(--violet);font-weight:800;font-size:.95rem}
+  .basket-strip{display:flex;gap:9px;overflow-x:auto;padding:2px 2px 4px;scrollbar-width:none}
+  .basket-strip::-webkit-scrollbar{display:none}
+  .basket-item{position:relative;flex:0 0 54px;width:54px;height:54px}
+  .basket-item .bi{position:absolute;inset:0;border-radius:12px;overflow:hidden;background:var(--lilac)}
+  .basket-item .bi img{width:100%;height:100%;object-fit:cover}
+  .basket-item .bi svg{width:76%;height:76%;margin:12% auto;display:block}
+  .basket-item .rm{
+    position:absolute;top:-6px;right:-6px;width:18px;height:18px;border-radius:50%;
+    background:var(--ink);color:#fff;font-size:.65rem;line-height:1;display:flex;
+    align-items:center;justify-content:center;box-shadow:0 2px 5px rgba(0,0,0,.25);z-index:3;
   }
+  .basket-empty{font-size:.76rem;color:var(--ink-2);padding:8px 2px;line-height:1.6}
 
   .pick-bar{
     display:flex;align-items:center;justify-content:space-between;
     margin:2px 2px 10px;
   }
   .pick-bar b{font-size:.9rem;font-weight:800}
-  .pick-count{font-size:.75rem;color:var(--ink-2)}
-  .pick-count em{font-style:normal;color:var(--violet);font-weight:800;font-size:.95rem}
+  .refresh-btn{
+    display:inline-flex;align-items:center;gap:5px;
+    background:var(--lilac);color:var(--violet);font-weight:700;font-size:.78rem;
+    padding:7px 14px;border-radius:999px;
+  }
+  .refresh-btn .ic{display:inline-block;font-size:.9rem;transition:transform .5s ease}
+  .refresh-btn.spin .ic{transform:rotate(360deg)}
 
   .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
   .sample{
@@ -316,12 +335,13 @@
   <!-- ② 盲盒详情 · 喜好挑选 -->
   <section class="view" id="view-detail">
     <div class="detail-head" id="detailHead"></div>
+    <div class="basket-card" id="basketCard"></div>
     <div class="pick-bar">
-      <b>挑选你喜欢的样图</b>
-      <span class="pick-count">已选 <em id="pickNum">0</em> / 9</span>
+      <b>挑选喜好样图</b>
+      <button class="refresh-btn" id="refreshBtn" onclick="refreshBatch()"><span class="ic">🔄</span>换一批</button>
     </div>
     <div class="grid" id="sampleGrid"></div>
-    <p class="note">点选样图作为发货喜好依据，最多 9 张，可随时调整。<br>我们会参考你的喜好为你搭配同品类惊喜款。</p>
+    <p class="note">点选样图加入喜好篮，最多 9 张；换一批可继续浏览更多样图。</p>
   </section>
 
   <!-- ③ 订阅设置 -->
@@ -465,7 +485,33 @@ const store = {
   set subs(v){ localStorage.setItem("mh_subs",JSON.stringify(v)) }
 };
 let navStack = ["home"];
-let cur = { boxId:null, likes:[], editingSubId:null, size:null, freq:"monthly", period:3 };
+let cur = { boxId:null, likes:[], editingSubId:null, size:null, freq:"monthly", period:3, batch:[] };
+function shuffle(arr){
+  const a = arr.slice();
+  for(let i=a.length-1;i>0;i--){
+    const j = Math.floor(Math.random()*(i+1));
+    [a[i],a[j]] = [a[j],a[i]];
+  }
+  return a;
+}
+/* 生成本轮展示的 9 张：已选中的优先保留可见，其余从剩余样例中随机抽取补满 */
+function buildBatch(){
+  const pool = Array.from({length:SAMPLE_COUNT},(_,i)=>i);
+  const likedFirst = cur.likes.filter(i=>pool.includes(i));
+  const rest = shuffle(pool.filter(i=>!cur.likes.includes(i)));
+  cur.batch = likedFirst.concat(rest).slice(0, Math.min(9, SAMPLE_COUNT));
+}
+function refreshBatch(){
+  const pool = Array.from({length:SAMPLE_COUNT},(_,i)=>i);
+  const likedFirst = cur.likes.filter(i=>pool.includes(i));
+  const rest = shuffle(pool.filter(i=>!cur.likes.includes(i)));
+  cur.batch = likedFirst.concat(rest).slice(0, Math.min(9, SAMPLE_COUNT));
+  renderDetail();
+  toast("已换一批样图 🔄");
+  const btn = document.getElementById("refreshBtn");
+  btn.classList.add("spin");
+  setTimeout(()=>btn.classList.remove("spin"), 500);
+}
 
 /* ================= 路由 ================= */
 const VIEWS = {
@@ -531,7 +577,8 @@ function renderHome(){
   dot.style.display = n?"flex":"none"; dot.textContent = n;
 }
 function openBox(id){
-  cur = { boxId:id, likes:[], editingSubId:null, size:null, freq:"monthly", period:3 };
+  cur = { boxId:id, likes:[], editingSubId:null, size:null, freq:"monthly", period:3, batch:[] };
+  buildBatch();
   go("detail");
 }
 
@@ -545,11 +592,10 @@ function renderDetail(){
         <div class="ship">${b.ship===0?"免运费":"运费 ¥"+b.ship+" /期"}</div>
       </div>
     </div>
-    <div style="margin-top:8px"><span class="pill">${b.cat}</span><span class="pill">惊喜发货</span><span class="pill">支持退换</span></div>
-    <div class="desc">${b.desc}</div>
-    <div class="warn">⚠ 以下均为<b>样例图</b>：用于表达你的喜好风格，实际寄出为同品类相似风格商品，<b>不会寄出完全相同的一件</b>。</div>`;
+    <p class="mini-note">${b.cat} · 同品类惊喜发货，样图仅供风格参考，不保证收到完全相同款式</p>`;
+  renderBasket();
   const grid = document.getElementById("sampleGrid");
-  grid.innerHTML = Array.from({length:SAMPLE_COUNT},(_,i)=>{
+  grid.innerHTML = cur.batch.map(i=>{
     const on = cur.likes.includes(i);
     const order = cur.likes.indexOf(i)+1;
     return `<button class="sample ${on?"on":""}" onclick="toggleLike(${i})" aria-pressed="${on}">
@@ -558,7 +604,22 @@ function renderDetail(){
       <span class="cat">${sampleName(b,i)}</span>
     </button>`;
   }).join("");
-  document.getElementById("pickNum").textContent = cur.likes.length;
+}
+function renderBasket(){
+  const b = BOXES.find(x=>x.id===cur.boxId);
+  const items = cur.likes.map(i=>`
+    <div class="basket-item">
+      <span class="bi">${photoImg(b,i)}</span>
+      <button class="rm" onclick="event.stopPropagation();removeLike(${i})" aria-label="移出喜好篮">×</button>
+    </div>`).join("");
+  document.getElementById("basketCard").innerHTML = `
+    <div class="bh"><b>🧺 我的喜好篮</b><span>已选 <em>${cur.likes.length}</em> / 9</span></div>
+    <div class="basket-strip">${items || '<div class="basket-empty">还没有选中样图，点下方样图即可放入喜好篮</div>'}</div>`;
+}
+function removeLike(i){
+  const idx = cur.likes.indexOf(i);
+  if(idx>-1) cur.likes.splice(idx,1);
+  renderDetail(); updateCTA("detail");
 }
 function toggleLike(i){
   const idx = cur.likes.indexOf(i);
@@ -653,7 +714,8 @@ function renderSubs(){
 }
 function editLikes(sid){
   const s = store.subs.find(x=>x.id===sid);
-  cur = { boxId:s.boxId, likes:s.likes.slice(), editingSubId:sid };
+  cur = { boxId:s.boxId, likes:s.likes.slice(), editingSubId:sid, batch:[] };
+  buildBatch();
   go("detail");
 }
 function saveLikes(){
