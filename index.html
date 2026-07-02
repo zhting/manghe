@@ -81,19 +81,35 @@
     box-shadow:0 2px 6px rgba(0,0,0,.15);
   }
   .box-card .thumbs{
-    display:grid;grid-template-columns:2fr 1fr;grid-template-rows:1fr 1fr;gap:3px;
-    height:200px;
+    display:flex;gap:8px;overflow-x:auto;
+    padding:14px 14px 2px;
+    scroll-snap-type:x mandatory;
+    -webkit-overflow-scrolling:touch;
+    scrollbar-width:none;
   }
-  .thumb{position:relative;overflow:hidden;background:var(--lilac)}
-  .thumb:first-child{grid-row:1/3}
+  .box-card .thumbs::-webkit-scrollbar{display:none}
+  .thumb{
+    position:relative;overflow:hidden;background:var(--lilac);
+    flex:0 0 128px;width:128px;height:164px;border-radius:12px;
+    scroll-snap-align:start;
+  }
   .thumb img{width:100%;height:100%;object-fit:cover}
-  .thumb svg{width:60%;height:60%;margin:20% auto}
+  .thumb svg{width:60%;height:60%;margin:26% auto}
+  .thumb .idx{
+    position:absolute;bottom:6px;right:6px;
+    background:rgba(31,29,43,.5);color:#fff;
+    font-size:.6rem;font-weight:600;padding:2px 7px;border-radius:999px;
+  }
   .thumb .more-mask{
     position:absolute;inset:0;background:rgba(31,29,43,.45);color:#fff;
     display:flex;flex-direction:column;align-items:center;justify-content:center;
     font-weight:800;font-size:.95rem;line-height:1.3;
   }
   .thumb .more-mask small{font-size:.62rem;font-weight:500;opacity:.85}
+  .swipe-hint{
+    font-size:.62rem;color:var(--ink-2);padding:6px 14px 0;
+    display:flex;align-items:center;gap:4px;
+  }
   .box-card .info{padding:12px 14px 14px;display:flex;align-items:flex-end;gap:10px}
   .box-card .info .name{flex:1}
   .box-card .info .name b{font-size:1.02rem;font-weight:800;display:block}
@@ -488,11 +504,17 @@ function toast(msg){
 function renderHome(){
   const el = document.getElementById("boxList");
   el.innerHTML = BOXES.map(b=>{
-    const thumbs = [0,1].map(i=>`<div class="thumb">${photoImg(b,i)}</div>`).join("") +
-      `<div class="thumb">${photoImg(b,2)}<div class="more-mask">+${SAMPLE_COUNT-3}<small>更多样例</small></div></div>`;
+    const N = Math.min(9, SAMPLE_COUNT);       // 首页最多展示 9 张，横向滑动查看
+    const rest = SAMPLE_COUNT - N;
+    const thumbs = Array.from({length:N},(_,i)=>{
+      const more = (i===N-1 && rest>0)
+        ? `<div class="more-mask">+${rest}<small>进入查看全部</small></div>` : "";
+      return `<div class="thumb"><span class="idx">${i+1}/${N}</span>${photoImg(b,i)}${more}</div>`;
+    }).join("");
     return `<div class="box-card" onclick="openBox('${b.id}')">
       <span class="seal">？ ${b.cat}盲盒</span>
-      <div class="thumbs">${thumbs}</div>
+      <div class="thumbs" onclick="event.stopPropagation();openBox('${b.id}')">${thumbs}</div>
+      <div class="swipe-hint">‹ 左右滑动查看更多样例 ›</div>
       <div class="info">
         <div class="name"><b>${b.name}</b><span>样例图仅供参考 · 发同品类惊喜款</span></div>
         <div>
