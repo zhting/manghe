@@ -6,19 +6,19 @@
 <title>衣启盲盒 · 服装订阅</title>
 <style>
   :root{
-    --bg:#F3F2F7;          /* 冷调紫灰底 */
+    --bg:#F5F5F7;
     --surface:#FFFFFF;
-    --ink:#26223B;          /* 深紫墨 */
-    --ink-2:#6E6A85;
-    --line:#E4E1EF;
-    --accent:#F0A422;       /* 姜黄封条色 */
+    --ink:#1F1D2B;
+    --ink-2:#8A8798;
+    --line:#ECEAF2;
+    --accent:#F0A422;
     --accent-ink:#8A5800;
-    --lilac:#E9E6F7;
+    --lilac:#EFEDF8;
     --violet:#5B4BC4;
     --ok:#2E9E6B;
-    --danger:#D8503F;
+    --danger:#F03E3E;
     --radius:16px;
-    --shadow:0 6px 20px rgba(38,34,59,.08);
+    --shadow:0 6px 20px rgba(31,29,43,.07);
     font-size:16px;
   }
   *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
@@ -31,11 +31,12 @@
   }
   button{font-family:inherit;border:0;background:none;cursor:pointer;color:inherit}
   input,select{font-family:inherit;font-size:1rem;color:var(--ink)}
+  img{display:block}
 
   /* ---------- 顶栏 ---------- */
   .topbar{
     position:sticky;top:0;z-index:20;
-    background:rgba(243,242,247,.92);backdrop-filter:blur(10px);
+    background:rgba(245,245,247,.92);backdrop-filter:blur(10px);
     padding:14px 16px 10px;display:flex;align-items:center;gap:10px;
   }
   .topbar .back{
@@ -54,7 +55,7 @@
 
   /* ---------- 首页 · 盲盒列表 ---------- */
   .hero{
-    background:linear-gradient(135deg,#2A2440 0%,#40357A 60%,#5B4BC4 100%);
+    background:linear-gradient(135deg,#232030 0%,#3D3268 60%,#5B4BC4 100%);
     color:#fff;border-radius:20px;padding:18px 18px 16px;margin:6px 0 18px;
     position:relative;overflow:hidden;
   }
@@ -74,21 +75,25 @@
     margin-bottom:16px;overflow:hidden;position:relative;
   }
   .box-card .seal{
-    position:absolute;top:12px;left:-8px;z-index:2;
+    position:absolute;top:12px;left:0;z-index:2;
     background:var(--accent);color:#2A2440;font-size:.68rem;font-weight:800;
     padding:4px 12px 4px 14px;border-radius:0 999px 999px 0;
     box-shadow:0 2px 6px rgba(0,0,0,.15);
   }
   .box-card .thumbs{
-    display:grid;grid-template-columns:repeat(4,1fr);gap:6px;
-    padding:14px 14px 0;
+    display:grid;grid-template-columns:2fr 1fr;grid-template-rows:1fr 1fr;gap:3px;
+    height:200px;
   }
-  .thumb{
-    background:var(--lilac);border-radius:12px;aspect-ratio:1;
-    display:flex;align-items:center;justify-content:center;overflow:hidden;
+  .thumb{position:relative;overflow:hidden;background:var(--lilac)}
+  .thumb:first-child{grid-row:1/3}
+  .thumb img{width:100%;height:100%;object-fit:cover}
+  .thumb svg{width:60%;height:60%;margin:20% auto}
+  .thumb .more-mask{
+    position:absolute;inset:0;background:rgba(31,29,43,.45);color:#fff;
+    display:flex;flex-direction:column;align-items:center;justify-content:center;
+    font-weight:800;font-size:.95rem;line-height:1.3;
   }
-  .thumb svg{width:78%;height:78%}
-  .thumb.more{position:relative;color:var(--violet);font-weight:700;font-size:.8rem}
+  .thumb .more-mask small{font-size:.62rem;font-weight:500;opacity:.85}
   .box-card .info{padding:12px 14px 14px;display:flex;align-items:flex-end;gap:10px}
   .box-card .info .name{flex:1}
   .box-card .info .name b{font-size:1.02rem;font-weight:800;display:block}
@@ -125,24 +130,34 @@
 
   .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
   .sample{
-    background:var(--surface);border-radius:14px;aspect-ratio:1;position:relative;
-    display:flex;align-items:center;justify-content:center;
-    border:2px solid transparent;box-shadow:0 2px 8px rgba(38,34,59,.06);
-    transition:transform .12s ease,border-color .12s ease;
+    background:var(--surface);border-radius:14px;aspect-ratio:3/4;position:relative;
+    overflow:visible;
+    border:2px solid transparent;box-shadow:0 2px 8px rgba(31,29,43,.06);
+    transition:transform .12s ease,border-color .12s ease;padding:0;
   }
-  .sample svg{width:76%;height:76%}
+  .sample .ph{
+    position:absolute;inset:0;border-radius:12px;overflow:hidden;background:var(--lilac);
+    display:flex;align-items:center;justify-content:center;
+  }
+  .sample .ph img{width:100%;height:100%;object-fit:cover}
+  .sample .ph svg{width:70%;height:70%}
   .sample:active{transform:scale(.95)}
-  .sample.on{border-color:var(--violet);background:#F6F4FF}
+  .sample.on{border-color:var(--violet)}
+  .sample.on .ph::after{
+    content:"";position:absolute;inset:0;background:rgba(91,75,196,.18);
+  }
   .sample .badge{
-    position:absolute;top:-7px;right:-7px;width:26px;height:26px;border-radius:50%;
+    position:absolute;top:-8px;right:-8px;width:26px;height:26px;border-radius:50%;
     background:var(--accent);color:#2A2440;font-size:.8rem;font-weight:800;
     display:none;align-items:center;justify-content:center;
-    transform:rotate(8deg);box-shadow:0 2px 6px rgba(0,0,0,.2);
+    transform:rotate(8deg);box-shadow:0 2px 6px rgba(0,0,0,.25);z-index:3;
   }
   .sample.on .badge{display:flex}
   .sample .cat{
-    position:absolute;bottom:6px;left:0;right:0;text-align:center;
-    font-size:.62rem;color:var(--ink-2);
+    position:absolute;bottom:0;left:0;right:0;z-index:2;
+    padding:16px 6px 6px;text-align:left;border-radius:0 0 12px 12px;
+    font-size:.62rem;color:#fff;
+    background:linear-gradient(transparent,rgba(0,0,0,.55));
   }
 
   /* ---------- 底部固定操作条 ---------- */
@@ -190,7 +205,8 @@
   .summary .r b{color:var(--ink)}
   .summary .total b{color:var(--danger);font-size:1.05rem}
   .liked-mini{display:flex;gap:6px;flex-wrap:wrap;margin-top:4px}
-  .liked-mini .m{width:44px;height:44px;border-radius:10px;background:var(--lilac);display:flex;align-items:center;justify-content:center}
+  .liked-mini .m{width:52px;height:52px;border-radius:10px;background:var(--lilac);overflow:hidden;display:flex;align-items:center;justify-content:center}
+  .liked-mini .m img{width:100%;height:100%;object-fit:cover}
   .liked-mini .m svg{width:76%;height:76%}
 
   /* ---------- 订阅列表 ---------- */
@@ -206,7 +222,7 @@
   .sub-card .head b{flex:1;font-size:.98rem;font-weight:800}
   .status{
     font-size:.66rem;font-weight:700;padding:3px 10px;border-radius:999px;
-    background:#E7F6EE;color:var(--ok);
+    background:#E7F6EE;color:var(--ok);white-space:nowrap;
   }
   .status.wait{background:#FFF3E0;color:var(--accent-ink)}
   .sub-card .rows{font-size:.75rem;color:var(--ink-2);line-height:1.9}
@@ -218,11 +234,13 @@
   .p-label{display:flex;justify-content:space-between;font-size:.68rem;color:var(--ink-2)}
   .sub-actions{display:flex;gap:10px;margin-top:12px}
   .sub-actions .btn{flex:1;padding:10px 0;font-size:.85rem;text-align:center}
-  .likes-strip{display:flex;gap:6px;overflow-x:auto;margin-top:10px;padding-bottom:2px}
-  .likes-strip .m{flex:0 0 46px;width:46px;height:46px;border-radius:10px;background:var(--lilac);display:flex;align-items:center;justify-content:center;position:relative}
+  .likes-strip{display:flex;gap:6px;overflow-x:auto;margin-top:10px;padding:4px 0 2px}
+  .likes-strip .m{flex:0 0 52px;width:52px;height:52px;border-radius:10px;background:var(--lilac);overflow:visible;position:relative}
+  .likes-strip .m .mi{position:absolute;inset:0;border-radius:10px;overflow:hidden;display:flex;align-items:center;justify-content:center}
+  .likes-strip .m img{width:100%;height:100%;object-fit:cover}
   .likes-strip .m svg{width:76%;height:76%}
   .likes-strip .m i{
-    position:absolute;top:-4px;right:-4px;width:16px;height:16px;border-radius:50%;
+    position:absolute;top:-5px;right:-5px;width:16px;height:16px;border-radius:50%;z-index:2;
     background:var(--accent);color:#2A2440;font-size:.58rem;font-weight:800;font-style:normal;
     display:flex;align-items:center;justify-content:center;transform:rotate(8deg);
   }
@@ -248,7 +266,7 @@
   }
   .toast{
     position:fixed;left:50%;bottom:110px;transform:translateX(-50%) translateY(10px);
-    background:rgba(38,34,59,.92);color:#fff;font-size:.8rem;
+    background:rgba(31,29,43,.92);color:#fff;font-size:.8rem;
     padding:9px 18px;border-radius:999px;opacity:0;pointer-events:none;
     transition:all .25s ease;z-index:99;white-space:nowrap;
   }
@@ -340,15 +358,70 @@
 <div class="toast" id="toast"></div>
 
 <script>
-/* ================= 数据 ================= */
+/* ================= 商品样例真实照片（Unsplash 免费授权，可商用外链） ================= */
+const U = id => `https://images.unsplash.com/photo-${id}?auto=format&fit=crop&w=480&q=70`;
+const PHOTOS = {
+  tee: [
+    "1521572163474-6864f9cf17ab","1576566588028-4147f3842f27","1583743814966-8936f5b7be1a",
+    "1562157873-818bc0726f68","1618354691373-d851c5c3a990","1571945153237-4929e783af4a",
+    "1503341504253-dff4815485f1","1586790170083-2f9ceadc732d","1554568218-0f1715e72254",
+    "1622445275576-721325763afe"
+  ].map(U),
+  shirt: [
+    "1596755094514-f87e34085b2c","1602810318383-e386cc2a3ccf","1598033129183-c4f50c736f10",
+    "1589310243389-96a5483213a8","1620012253295-c15cc3e65df4","1563630423918-b58f07336ac9",
+    "1607345366928-199ea26cfe3e","1594938298603-c8148c4dae35","1617137968427-85924c800a22",
+    "1603252109303-2751441dd157"
+  ].map(U),
+  pants: [
+    "1541099649105-f69ad21f3246","1594633312681-425c7b97ccd1","1624378439575-d8705ad7ae80",
+    "1473966968600-fa801b869a1a","1584865288642-42078afe6942","1552374196-1ab2a1c593e8",
+    "1560243563-062bfc001d68","1604176354204-9268737828e4","1592878904946-b3cd8ae243d0",
+    "1555689502-c4b22d76c56f"
+  ].map(U),
+  hoodie: [
+    "1556821840-3a63f95609a7","1591047139829-d91aecb6caea","1578681994506-b8f463449011",
+    "1509942774463-acf339cf87d5","1611312449408-fcece27cdbb7","1620799140408-edc6dcb6d633",
+    "1564557287817-3785e38ec1f5","1547949003-9792a18a2601","1602293589930-45aad59ba3ab",
+    "1519058082700-08a0b56da9b4"
+  ].map(U),
+  dress: [
+    "1595777457583-95e059d581b8","1515372039744-b8f02a3ae446","1496747611176-843222e1e57c",
+    "1483985988355-763728e1935b","1490481651871-ab68de25d43d","1539008835657-9e8e9680c956",
+    "1572804013309-59a88b7e92f1","1585487000160-6ebcfceb0d03","1612336307429-8a898d10e223",
+    "1583496661160-fb5886a13d44"
+  ].map(U)
+};
+const SAMPLE_COUNT = 10;
+
+/* ================= 插画兜底（图片加载失败时使用） ================= */
 const PALETTES = [
   ["#5B4BC4","#C9C2F0"],["#E4735C","#F6D3C7"],["#2E9E6B","#BEE8D2"],
   ["#3E6FB8","#C6DAF3"],["#C79A2B","#F1E2B3"],["#8A55B5","#E0CDF0"],
   ["#4A4A5E","#CFCFDD"],["#C4506B","#F2CBD6"],["#3A9E9E","#C4EAEA"],
-  ["#7B6247","#E2D4C3"],["#D0873A","#F5DDBE"],["#556B2F","#D5E0BE"]
+  ["#7B6247","#E2D4C3"]
 ];
-const PATTERNS = ["solid","stripe","dot","solid","stripe","solid","dot","solid","stripe","dot","solid","stripe"];
+function garmentSVG(type,i){
+  const [c1,c2] = PALETTES[i % PALETTES.length];
+  const stroke = `stroke="#26223B" stroke-width="2.5" stroke-linejoin="round"`;
+  let body = "";
+  if(type==="tshirt") body = `<path d="M32 16 L18 24 L8 42 L22 50 L26 43 L26 88 L74 88 L74 43 L78 50 L92 42 L82 24 L68 16 Q59 26 50 26 Q41 26 32 16 Z" fill="${c1}" ${stroke}/><path d="M40 17 Q50 24 60 17" fill="none" ${stroke}/>`;
+  else if(type==="shirt") body = `<path d="M34 14 L20 22 L12 44 L24 50 L28 42 L28 92 L72 92 L72 42 L76 50 L88 44 L80 22 L66 14 L58 26 L50 22 L42 26 Z" fill="${c1}" ${stroke}/><line x1="50" y1="30" x2="50" y2="88" stroke="#26223B" stroke-width="2"/>`;
+  else if(type==="trousers") body = `<path d="M30 14 H70 L75 90 H56 L50 44 L44 90 H25 Z" fill="${c1}" ${stroke}/><rect x="29" y="12" width="42" height="8" rx="2" fill="${c2}" ${stroke}/>`;
+  else if(type==="hoodie") body = `<path d="M32 22 L18 30 L10 48 L24 54 L28 47 L28 90 L72 90 L72 47 L76 54 L90 48 L82 30 L68 22 Z" fill="${c1}" ${stroke}/><path d="M32 22 Q34 8 50 8 Q66 8 68 22 Q60 30 50 30 Q40 30 32 22 Z" fill="${c2}" ${stroke}/><path d="M38 72 H62 V90 H38 Z" fill="${c2}" ${stroke}/>`;
+  else if(type==="dress") body = `<path d="M36 12 L32 30 L18 90 H82 L68 30 L64 12 Q57 22 50 22 Q43 22 36 12 Z" fill="${c1}" ${stroke}/><path d="M32 30 Q50 40 68 30" fill="none" ${stroke}/>`;
+  return `<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">${body}</svg>`;
+}
+function imgFallback(el,type,i){
+  const wrap = el.parentElement;
+  el.remove();
+  wrap.insertAdjacentHTML("afterbegin", garmentSVG(type,i));
+}
+function photoImg(box,i){
+  return `<img src="${PHOTOS[box.id][i]}" loading="lazy" alt="${box.cat}样例${i+1}" onerror="imgFallback(this,'${box.type}',${i})">`;
+}
 
+/* ================= 数据 ================= */
 const BOXES = [
   {id:"tee",   name:"元气T恤盲盒",  cat:"T恤",  type:"tshirt",  price:69,  ship:8,  sizes:["S","M","L","XL","XXL"],
    desc:"每期随机寄出 1 件同风格印花或纯色 T 恤，参考你的喜好样图搭配。"},
@@ -361,55 +434,11 @@ const BOXES = [
   {id:"dress", name:"轻裙物语盲盒", cat:"连衣裙",type:"dress",  price:169, ship:12, sizes:["S","M","L","XL"],
    desc:"每期随机寄出 1 条应季连衣裙，色彩与廓形参考你的喜好。"}
 ];
-
 const FREQS = [
   {id:"monthly", label:"每月一次", days:30},
   {id:"biweekly",label:"每两周一次", days:14}
 ];
 const PERIODS = [3,6,12];
-
-/* ================= 服装样图 SVG ================= */
-function garmentSVG(type,i){
-  const [c1,c2] = PALETTES[i % PALETTES.length];
-  const pat = PATTERNS[i % PATTERNS.length];
-  const pid = `p_${type}_${i}`;
-  let defs = "";
-  let fill = c1;
-  if(pat==="stripe"){
-    defs = `<defs><pattern id="${pid}" width="12" height="12" patternUnits="userSpaceOnUse" patternTransform="rotate(0)">
-      <rect width="12" height="12" fill="${c1}"/><rect width="12" height="5" fill="${c2}"/></pattern></defs>`;
-    fill = `url(#${pid})`;
-  } else if(pat==="dot"){
-    defs = `<defs><pattern id="${pid}" width="14" height="14" patternUnits="userSpaceOnUse">
-      <rect width="14" height="14" fill="${c1}"/><circle cx="7" cy="7" r="2.4" fill="${c2}"/></pattern></defs>`;
-    fill = `url(#${pid})`;
-  }
-  const stroke = `stroke="#26223B" stroke-width="2.5" stroke-linejoin="round"`;
-  let body = "";
-  if(type==="tshirt"){
-    body = `<path d="M32 16 L18 24 L8 42 L22 50 L26 43 L26 88 L74 88 L74 43 L78 50 L92 42 L82 24 L68 16 Q59 26 50 26 Q41 26 32 16 Z" fill="${fill}" ${stroke}/>
-            <path d="M40 17 Q50 24 60 17" fill="none" ${stroke}/>`;
-  } else if(type==="shirt"){
-    body = `<path d="M34 14 L20 22 L12 44 L24 50 L28 42 L28 92 L72 92 L72 42 L76 50 L88 44 L80 22 L66 14 L58 26 L50 22 L42 26 Z" fill="${fill}" ${stroke}/>
-            <path d="M42 26 L50 22 L58 26" fill="none" ${stroke}/>
-            <line x1="50" y1="30" x2="50" y2="88" stroke="#26223B" stroke-width="2"/>
-            <circle cx="50" cy="40" r="1.8" fill="#26223B"/><circle cx="50" cy="55" r="1.8" fill="#26223B"/><circle cx="50" cy="70" r="1.8" fill="#26223B"/>`;
-  } else if(type==="trousers"){
-    body = `<path d="M30 14 H70 L75 90 H56 L50 44 L44 90 H25 Z" fill="${fill}" ${stroke}/>
-            <rect x="29" y="12" width="42" height="8" rx="2" fill="${c2}" ${stroke}/>
-            <line x1="50" y1="22" x2="50" y2="14" stroke="#26223B" stroke-width="2"/>`;
-  } else if(type==="hoodie"){
-    body = `<path d="M32 22 L18 30 L10 48 L24 54 L28 47 L28 90 L72 90 L72 47 L76 54 L90 48 L82 30 L68 22 Z" fill="${fill}" ${stroke}/>
-            <path d="M32 22 Q34 8 50 8 Q66 8 68 22 Q60 30 50 30 Q40 30 32 22 Z" fill="${c2}" ${stroke}/>
-            <line x1="45" y1="32" x2="44" y2="44" stroke="#26223B" stroke-width="2.4" stroke-linecap="round"/>
-            <line x1="55" y1="32" x2="56" y2="44" stroke="#26223B" stroke-width="2.4" stroke-linecap="round"/>
-            <path d="M38 72 H62 V90 H38 Z" fill="${c2}" ${stroke}/>`;
-  } else if(type==="dress"){
-    body = `<path d="M36 12 L32 30 L18 90 H82 L68 30 L64 12 Q57 22 50 22 Q43 22 36 12 Z" fill="${fill}" ${stroke}/>
-            <path d="M32 30 Q50 40 68 30" fill="none" ${stroke}/>`;
-  }
-  return `<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">${defs}${body}</svg>`;
-}
 const sampleName = (box,i)=>`${box.cat}样例 ${String(i+1).padStart(2,"0")}`;
 
 /* ================= 状态 ================= */
@@ -459,10 +488,11 @@ function toast(msg){
 function renderHome(){
   const el = document.getElementById("boxList");
   el.innerHTML = BOXES.map(b=>{
-    const thumbs = [0,1,2].map(i=>`<div class="thumb">${garmentSVG(b.type,i)}</div>`).join("");
+    const thumbs = [0,1].map(i=>`<div class="thumb">${photoImg(b,i)}</div>`).join("") +
+      `<div class="thumb">${photoImg(b,2)}<div class="more-mask">+${SAMPLE_COUNT-3}<small>更多样例</small></div></div>`;
     return `<div class="box-card" onclick="openBox('${b.id}')">
       <span class="seal">？ ${b.cat}盲盒</span>
-      <div class="thumbs">${thumbs}<div class="thumb more">+9<br>样例</div></div>
+      <div class="thumbs">${thumbs}</div>
       <div class="info">
         <div class="name"><b>${b.name}</b><span>样例图仅供参考 · 发同品类惊喜款</span></div>
         <div>
@@ -486,7 +516,7 @@ function renderDetail(){
   const b = BOXES.find(x=>x.id===cur.boxId);
   document.getElementById("detailHead").innerHTML = `
     <div class="row"><b>${b.name}</b>
-      <div style="text-align:right">
+      <div style="text-align:right;margin-left:auto">
         <div class="price">¥${b.price}<small> /期</small></div>
         <div class="ship">${b.ship===0?"免运费":"运费 ¥"+b.ship+" /期"}</div>
       </div>
@@ -495,11 +525,11 @@ function renderDetail(){
     <div class="desc">${b.desc}</div>
     <div class="warn">⚠ 以下均为<b>样例图</b>：用于表达你的喜好风格，实际寄出为同品类相似风格商品，<b>不会寄出完全相同的一件</b>。</div>`;
   const grid = document.getElementById("sampleGrid");
-  grid.innerHTML = Array.from({length:12},(_,i)=>{
+  grid.innerHTML = Array.from({length:SAMPLE_COUNT},(_,i)=>{
     const on = cur.likes.includes(i);
     const order = cur.likes.indexOf(i)+1;
     return `<button class="sample ${on?"on":""}" onclick="toggleLike(${i})" aria-pressed="${on}">
-      ${garmentSVG(b.type,i)}
+      <span class="ph">${photoImg(b,i)}</span>
       <span class="badge">${order||""}</span>
       <span class="cat">${sampleName(b,i)}</span>
     </button>`;
@@ -520,7 +550,7 @@ function toggleLike(i){
 function renderCheckout(){
   const b = BOXES.find(x=>x.id===cur.boxId);
   document.getElementById("likedMini").innerHTML =
-    cur.likes.map(i=>`<div class="m">${garmentSVG(b.type,i)}</div>`).join("") ||
+    cur.likes.map(i=>`<div class="m">${photoImg(b,i)}</div>`).join("") ||
     `<span style="font-size:.75rem;color:var(--ink-2)">未选择样图（将由造型师全权搭配）</span>`;
   document.getElementById("sizeChips").innerHTML = b.sizes.map(s=>
     `<button class="chip ${cur.size===s?"on":""}" onclick="setSize('${s}')">${s}</button>`).join("");
@@ -576,7 +606,7 @@ function renderSubs(){
     const f = FREQS.find(x=>x.id===s.freq);
     const pct = Math.round(s.shipped/s.period*100);
     const next = s.shipped>=s.period ? null : s.createdAt + s.shipped*f.days*86400000;
-    const likes = s.likes.map((i,k)=>`<div class="m">${garmentSVG(b.type,i)}<i>${k+1}</i></div>`).join("");
+    const likes = s.likes.map((i,k)=>`<div class="m"><span class="mi">${photoImg(b,i)}</span><i>${k+1}</i></div>`).join("");
     return `<div class="sub-card">
       <div class="head"><b>${b.name}</b>
         <span class="status ${s.shipped>=s.period?"":"wait"}">${s.shipped>=s.period?"已完结":"进行中 · 第 "+s.shipped+" 期备货中"}</span>
@@ -631,12 +661,11 @@ function updateCTA(name){
     if(cur.editingSubId){
       btn.textContent = "保存喜好";
       btn.onclick = saveLikes;
-      btn.disabled = false;
     }else{
       btn.textContent = "下一步：订阅设置";
       btn.onclick = ()=>go("checkout");
-      btn.disabled = false;
     }
+    btn.disabled = false;
   } else if(name==="checkout"){
     const b = BOXES.find(x=>x.id===cur.boxId);
     const total = (b.price+b.ship)*cur.period;
