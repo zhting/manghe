@@ -150,13 +150,16 @@
   }
   .modal-mask.show{opacity:1;pointer-events:auto}
   .basket-sheet{
-    position:fixed;left:0;right:0;bottom:0;z-index:41;
-    width:100%;max-width:480px;margin:0 auto;
+    position:fixed;bottom:0;z-index:41;
+    /* 左右对称留白，视口宽于480px时自动居中，窄于480px时紧贴两边，任何情况都不会超出屏幕 */
+    left:max(0px, calc(50% - 240px));
+    right:max(0px, calc(50% - 240px));
     transform:translateY(105%);
     background:var(--surface);border-radius:22px 22px 0 0;
     padding:18px 16px calc(20px + env(safe-area-inset-bottom));
     box-shadow:0 -10px 30px rgba(24,10,12,.18);
     transition:transform .3s cubic-bezier(.22,.85,.32,1);
+    max-height:78vh;overflow-y:auto;
   }
   .basket-sheet.show{transform:translateY(0)}
   .sheet-head{display:flex;align-items:center;justify-content:space-between}
@@ -167,11 +170,15 @@
   }
   .sheet-sub{font-size:.75rem;color:var(--ink-2);margin:4px 0 14px}
   .sheet-sub em{font-style:normal;color:var(--violet);font-weight:800;font-size:.9rem}
-  .basket-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
-  .bslot{position:relative;aspect-ratio:1}
+  .basket-grid{
+    display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;
+    padding-top:8px; /* 给第一行的×移出按钮留出空间 */
+  }
+  .bslot{position:relative;aspect-ratio:1;min-width:0}
   .bslot .bi{position:absolute;inset:0;border-radius:14px;overflow:hidden}
   .bslot.filled .bi{background:var(--lilac)}
   .bslot.filled img{width:100%;height:100%;object-fit:cover}
+  .bslot.filled svg{width:76%;height:76%;margin:12% auto;display:block}
   .bslot.empty .bi{
     background:var(--bg);border:1.5px dashed var(--line);
     display:flex;align-items:center;justify-content:center;
