@@ -128,29 +128,64 @@
   }
   .detail-head .row{display:flex;align-items:flex-start;gap:10px}
   .detail-head b{font-size:1.1rem;font-weight:800}
-  .detail-head .mini-note{font-size:.72rem;color:var(--ink-2);margin-top:8px;line-height:1.6}
+  .head-foot{display:flex;align-items:center;gap:10px;margin-top:9px}
+  .head-foot .mini-note{flex:1;font-size:.72rem;color:var(--ink-2);line-height:1.6}
 
-  /* 喜好篮子 */
-  .basket-card{
-    background:var(--surface);border-radius:var(--radius);box-shadow:var(--shadow);
-    padding:12px 14px;margin-bottom:14px;
+  /* 喜好篮入口图标（合并进盲盒介绍卡片） */
+  .basket-fab{
+    position:relative;flex:0 0 auto;width:42px;height:42px;border-radius:50%;
+    background:var(--lilac);display:flex;align-items:center;justify-content:center;
+    font-size:1.15rem;
   }
-  .basket-card .bh{display:flex;align-items:center;justify-content:space-between;margin-bottom:9px}
-  .basket-card .bh b{font-size:.88rem;font-weight:800}
-  .basket-card .bh span{font-size:.75rem;color:var(--ink-2)}
-  .basket-card .bh span em{font-style:normal;color:var(--violet);font-weight:800;font-size:.95rem}
-  .basket-strip{display:flex;gap:9px;overflow-x:auto;padding:2px 2px 4px;scrollbar-width:none}
-  .basket-strip::-webkit-scrollbar{display:none}
-  .basket-item{position:relative;flex:0 0 54px;width:54px;height:54px}
-  .basket-item .bi{position:absolute;inset:0;border-radius:12px;overflow:hidden;background:var(--lilac)}
-  .basket-item .bi img{width:100%;height:100%;object-fit:cover}
-  .basket-item .bi svg{width:76%;height:76%;margin:12% auto;display:block}
-  .basket-item .rm{
-    position:absolute;top:-6px;right:-6px;width:18px;height:18px;border-radius:50%;
-    background:var(--ink);color:#fff;font-size:.65rem;line-height:1;display:flex;
+  .basket-fab .cnt{
+    position:absolute;top:-4px;right:-5px;min-width:18px;height:18px;padding:0 4px;
+    border-radius:999px;background:var(--violet);color:#fff;font-size:.62rem;font-weight:800;
+    display:flex;align-items:center;justify-content:center;box-shadow:0 2px 5px rgba(0,0,0,.2);
+  }
+
+  /* 喜好篮弹窗（底部抽屉式新窗口） */
+  .modal-mask{
+    position:fixed;inset:0;z-index:40;background:rgba(24,10,12,.5);
+    opacity:0;pointer-events:none;transition:opacity .25s ease;
+  }
+  .modal-mask.show{opacity:1;pointer-events:auto}
+  .basket-sheet{
+    position:fixed;left:50%;bottom:0;z-index:41;
+    width:100%;max-width:480px;
+    transform:translate(-50%,105%);
+    background:var(--surface);border-radius:22px 22px 0 0;
+    padding:18px 16px calc(20px + env(safe-area-inset-bottom));
+    box-shadow:0 -10px 30px rgba(24,10,12,.18);
+    transition:transform .3s cubic-bezier(.22,.85,.32,1);
+  }
+  .basket-sheet.show{transform:translate(-50%,0)}
+  .sheet-head{display:flex;align-items:center;justify-content:space-between}
+  .sheet-head b{font-size:1.02rem;font-weight:800}
+  .sheet-close{
+    width:28px;height:28px;border-radius:50%;background:var(--bg);color:var(--ink-2);
+    font-size:1rem;display:flex;align-items:center;justify-content:center;
+  }
+  .sheet-sub{font-size:.75rem;color:var(--ink-2);margin:4px 0 14px}
+  .sheet-sub em{font-style:normal;color:var(--violet);font-weight:800;font-size:.9rem}
+  .basket-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+  .bslot{position:relative;aspect-ratio:1}
+  .bslot .bi{position:absolute;inset:0;border-radius:14px;overflow:hidden}
+  .bslot.filled .bi{background:var(--lilac)}
+  .bslot.filled img{width:100%;height:100%;object-fit:cover}
+  .bslot.empty .bi{
+    background:var(--bg);border:1.5px dashed var(--line);
+    display:flex;align-items:center;justify-content:center;
+    color:var(--line);font-size:1.6rem;font-weight:300;
+  }
+  .bslot .rm{
+    position:absolute;top:-7px;right:-7px;width:22px;height:22px;border-radius:50%;
+    background:var(--ink);color:#fff;font-size:.75rem;display:flex;
     align-items:center;justify-content:center;box-shadow:0 2px 5px rgba(0,0,0,.25);z-index:3;
   }
-  .basket-empty{font-size:.76rem;color:var(--ink-2);padding:8px 2px;line-height:1.6}
+  .bslot .num{
+    position:absolute;bottom:5px;left:5px;background:rgba(0,0,0,.42);color:#fff;
+    font-size:.6rem;padding:1px 6px;border-radius:999px;
+  }
 
   .pick-bar{
     display:flex;align-items:center;justify-content:space-between;
@@ -335,7 +370,6 @@
   <!-- ② 盲盒详情 · 喜好挑选 -->
   <section class="view" id="view-detail">
     <div class="detail-head" id="detailHead"></div>
-    <div class="basket-card" id="basketCard"></div>
     <div class="pick-bar">
       <b>挑选喜好样图</b>
       <button class="refresh-btn" id="refreshBtn" onclick="refreshBatch()"><span class="ic">🔄</span>换一批</button>
@@ -392,6 +426,17 @@
   <button id="tabHome" class="on" onclick="go('home')"><span class="ic">🎁</span>盲盒</button>
   <button id="tabSubs" onclick="go('subs')" style="position:relative"><span class="ic">📦</span>我的订阅<span class="dot" id="subDot" style="display:none"></span></button>
 </nav>
+
+<!-- 喜好篮弹窗 -->
+<div class="modal-mask" id="basketMask" onclick="closeBasket()"></div>
+<div class="basket-sheet" id="basketSheet">
+  <div class="sheet-head">
+    <b>🧺 我的喜好篮</b>
+    <button class="sheet-close" onclick="closeBasket()" aria-label="关闭">×</button>
+  </div>
+  <div class="sheet-sub" id="basketSheetSub"></div>
+  <div class="basket-grid" id="basketGrid"></div>
+</div>
 
 <div class="toast" id="toast"></div>
 
@@ -521,6 +566,7 @@ const VIEWS = {
   subs:    {title:"我的订阅", sub:"随时查看进展 · 调整喜好", tab:true}
 };
 function go(name, push=true){
+  closeBasket();
   if(push && navStack[navStack.length-1]!==name) navStack.push(name);
   document.querySelectorAll(".view").forEach(v=>v.classList.remove("active"));
   document.getElementById("view-"+name).classList.add("active");
@@ -592,8 +638,12 @@ function renderDetail(){
         <div class="ship">${b.ship===0?"免运费":"运费 ¥"+b.ship+" /期"}</div>
       </div>
     </div>
-    <p class="mini-note">${b.cat} · 同品类惊喜发货，样图仅供风格参考，不保证收到完全相同款式</p>`;
-  renderBasket();
+    <div class="head-foot">
+      <p class="mini-note">${b.cat} · 同品类惊喜发货，样图仅供风格参考</p>
+      <button class="basket-fab" onclick="openBasket()" aria-label="查看我的喜好篮">
+        <span class="ic">🧺</span><span class="cnt">${cur.likes.length}</span>
+      </button>
+    </div>`;
   const grid = document.getElementById("sampleGrid");
   grid.innerHTML = cur.batch.map(i=>{
     const on = cur.likes.includes(i);
@@ -604,17 +654,33 @@ function renderDetail(){
       <span class="cat">${sampleName(b,i)}</span>
     </button>`;
   }).join("");
+  if(document.getElementById("basketSheet").classList.contains("show")) renderBasketModal();
 }
-function renderBasket(){
+/* 喜好篮弹窗：固定 9 个位置，已选样图占位，其余为空位 */
+function renderBasketModal(){
   const b = BOXES.find(x=>x.id===cur.boxId);
-  const items = cur.likes.map(i=>`
-    <div class="basket-item">
-      <span class="bi">${photoImg(b,i)}</span>
-      <button class="rm" onclick="event.stopPropagation();removeLike(${i})" aria-label="移出喜好篮">×</button>
-    </div>`).join("");
-  document.getElementById("basketCard").innerHTML = `
-    <div class="bh"><b>🧺 我的喜好篮</b><span>已选 <em>${cur.likes.length}</em> / 9</span></div>
-    <div class="basket-strip">${items || '<div class="basket-empty">还没有选中样图，点下方样图即可放入喜好篮</div>'}</div>`;
+  document.getElementById("basketSheetSub").innerHTML =
+    `已选 <em>${cur.likes.length}</em> / 9 · 点已选样图右上角可移出`;
+  document.getElementById("basketGrid").innerHTML = Array.from({length:9},(_,k)=>{
+    const i = cur.likes[k];
+    if(i===undefined){
+      return `<div class="bslot empty"><div class="bi">+</div><span class="num">${k+1}</span></div>`;
+    }
+    return `<div class="bslot filled">
+      <div class="bi">${photoImg(b,i)}</div>
+      <button class="rm" onclick="removeLike(${i})" aria-label="移出喜好篮">×</button>
+      <span class="num">${k+1}</span>
+    </div>`;
+  }).join("");
+}
+function openBasket(){
+  renderBasketModal();
+  document.getElementById("basketMask").classList.add("show");
+  document.getElementById("basketSheet").classList.add("show");
+}
+function closeBasket(){
+  document.getElementById("basketMask").classList.remove("show");
+  document.getElementById("basketSheet").classList.remove("show");
 }
 function removeLike(i){
   const idx = cur.likes.indexOf(i);
