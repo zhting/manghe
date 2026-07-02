@@ -22,7 +22,7 @@
     font-size:16px;
   }
   *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-  html,body{height:100%}
+  html,body{height:100%;overflow-x:hidden}
   body{
     font-family:"PingFang SC","Noto Sans SC","Microsoft YaHei",system-ui,sans-serif;
     background:var(--bg);color:var(--ink);
@@ -150,15 +150,15 @@
   }
   .modal-mask.show{opacity:1;pointer-events:auto}
   .basket-sheet{
-    position:fixed;left:50%;bottom:0;z-index:41;
-    width:100%;max-width:480px;
-    transform:translate(-50%,105%);
+    position:fixed;left:0;right:0;bottom:0;z-index:41;
+    width:100%;max-width:480px;margin:0 auto;
+    transform:translateY(105%);
     background:var(--surface);border-radius:22px 22px 0 0;
     padding:18px 16px calc(20px + env(safe-area-inset-bottom));
     box-shadow:0 -10px 30px rgba(24,10,12,.18);
     transition:transform .3s cubic-bezier(.22,.85,.32,1);
   }
-  .basket-sheet.show{transform:translate(-50%,0)}
+  .basket-sheet.show{transform:translateY(0)}
   .sheet-head{display:flex;align-items:center;justify-content:space-between}
   .sheet-head b{font-size:1.02rem;font-weight:800}
   .sheet-close{
@@ -306,6 +306,11 @@
   .p-label{display:flex;justify-content:space-between;font-size:.68rem;color:var(--ink-2)}
   .sub-actions{display:flex;gap:10px;margin-top:12px}
   .sub-actions .btn{flex:1;padding:10px 0;font-size:.85rem;text-align:center}
+  .cancel-link{
+    display:block;width:100%;text-align:center;margin-top:8px;padding:8px 0 2px;
+    font-size:.76rem;color:var(--ink-2);
+  }
+  .cancel-link:active{color:var(--danger)}
   .likes-strip{display:flex;gap:6px;overflow-x:auto;margin-top:10px;padding:4px 0 2px}
   .likes-strip .m{flex:0 0 52px;width:52px;height:52px;border-radius:10px;background:var(--lilac);overflow:visible;position:relative}
   .likes-strip .m .mi{position:absolute;inset:0;border-radius:10px;overflow:hidden;display:flex;align-items:center;justify-content:center}
@@ -775,6 +780,7 @@ function renderSubs(){
         <button class="btn ghost" onclick="editLikes('${s.id}')">调整喜好图</button>
         <button class="btn" onclick="mockShip('${s.id}')">模拟收货</button>
       </div>
+      <button class="cancel-link" onclick="cancelSub('${s.id}')">取消订阅</button>
     </div>`;
   }).join("");
 }
@@ -796,8 +802,27 @@ function saveLikes(){
 function mockShip(sid){
   const subs = store.subs;
   const s = subs.find(x=>x.id===sid);
-  if(s.shipped<s.period){ s.shipped++; store.subs = subs; toast("已签收第 "+(s.shipped-1)+" 期，惊喜到手 🎉"); }
-  else toast("本订阅已全部发完");
+  if(s.shipped < s.period){
+    const doneNo = s.shipped;
+    s.shipped++;
+    store.subs = subs;
+    if(s.shipped <= s.period){
+      toast(`已签收第 ${doneNo} 期，第 ${s.shipped} 期已开始备货 🎁`);
+    } else {
+      toast(`已签收第 ${doneNo} 期，全部 ${s.period} 期订阅已完成 🎉`);
+    }
+  } else {
+    toast("本订阅已全部发完，感谢订阅～");
+  }
+  renderSubs();
+}
+function cancelSub(sid){
+  const s = store.subs.find(x=>x.id===sid);
+  if(!s) return;
+  const b = BOXES.find(x=>x.id===s.boxId);
+  if(!confirm(`确定要取消「${b.name}」的订阅吗？\n取消后将从我的订阅中移除，且无法恢复。`)) return;
+  store.subs = store.subs.filter(x=>x.id!==sid);
+  toast("已取消订阅");
   renderSubs();
 }
 
